@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    
+    <div class="quiz-container">
+        <div id="start-screen" class="screen active">
+            <h1>Welcome to the Quiz!</h1>
+            <button id="start-btn">Start Quiz</button>
+            <h3>Test Your Knowledge In Web Develpment</h3>
+        </div>
+        <div id="quiz-screen" class="screen">
+            <h2 id="question">Question Text</h2>
+            <div id="options" class="options"></div>
+            <button id="next-btn">Next</button>
+        </div>
+        <div id="result-screen" class="screen">
+            <h1>Quiz Completed!</h1>
+            <p id="score">Your score: 0</p>
+            <button id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+    <style>
+     /* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #80ec72;
+}
+h2{
+    text-align: center;
+}
+/* Quiz Container */
+.quiz-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    padding: 20px;
+}
+
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#start-btn, #restart-btn {
+    background: #4caf50;
+    color: white;
+}
+
+#next-btn {
+    background: #2196f3;
+    color: white;
+    margin-top: 10px;
+}
+
+
+#question {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.options button {
+    background: #eee;
+    border: 1px solid #ccc;
+    color: #333;
+    text-align: left;
+}
+
+.options button.correct {
+    background: #4caf50;
+    color: white;
+}
+
+.options button.incorrect {
+    background: #f44336;
+    color: white;
+}
+    </style>
+
+
+ <script>
+
+// Questions Array
+ const questions = [
+     {
+         question: "What does HTML stand for?",
+         options: [
+             "Hyper Text Markup Language",
+             "Home Tool Markup Language",
+             "Hyperlinks and Text Markup Language"
+         ],
+         answer: "Hyper Text Markup Language"
+     },
+     {
+         question: "What does CSS stand for?",
+         options: [
+             "Creative Style Sheets",
+             "Cascading Style Sheets",
+             "Computer Style Sheets"
+         ],
+         answer: "Cascading Style Sheets"
+     },
+     {
+         question: "What does JS stand for?",
+         options: [
+             "Java Syntax",
+             "JavaScript",
+             "Just Script"
+         ],
+         answer: "JavaScript"
+     },
+    {
+        question: "Which HTML tag is used to create a hyperlink?",
+        options: [
+            "<link>",
+            "<a>",
+            "<href>",
+            "<button>"
+        ],
+        answer: "<a>"
+    },
+    {
+        question: "What is the correct way to apply an external CSS file?",
+        options: [
+            "<link rel='stylesheet' href='style.css'>",
+            "<style src='style.css'>",
+            "<css>style.css</css>",
+            "<script href='style.css'>"
+        ],
+        answer: "<link rel='stylesheet' href='style.css'>"
+    },
+    
+    {
+        question: "Which property is used to change the text color in CSS?",
+        options: [
+            "text-color",
+            "font-color",
+            "color",
+            "text-style"
+        ],
+        answer: "color"
+    },
+    {
+        question: "Which tag is used to define a paragraph in HTML?",
+        options: [
+            "<para>",
+            "<p>",
+            "<pg>",
+            "<text>"
+        ],
+        answer: "<p>"
+    },
+    
+    {
+        question: "What does the `float` property do in CSS?",
+        options: [
+            "Adds animation to elements",
+            "Aligns an element to the left or right",
+            "Centers text horizontally",
+            "Changes the font style"
+        ],
+        answer: "Aligns an element to the left or right",
+    },
+    
+    {
+        question: "Which HTML tag is used to add an image?",
+        options: [
+            "<img>",
+            "<picture>",
+            "<image>",
+            "<src>"
+        ],
+        answer: "<img>"
+    },
+    {
+        question: "What is the default position property in CSS?",
+        options: [
+            "absolute",
+            "fixed",
+            "relative",
+            "static"
+        ],
+        answer: "static"
+    },
+    
+    {
+        question: "Which CSS property is used to make text bold?",
+        options: [
+            "font-weight",
+            "text-bold",
+            "bold",
+            "font-style"
+        ],
+        answer: "font-weight"
+    },
+    
+    {
+        question: "Which tag is used to create an unordered list in HTML?",
+        options: [
+            "<ol>",
+            "<ul>",
+            "<li>",
+            "<list>"
+        ],
+        answer: "<ul>"
+    }
+];
+
+ 
+ // DOM Elements
+ const startScreen = document.getElementById('start-screen');
+ const quizScreen = document.getElementById('quiz-screen');
+ const resultScreen = document.getElementById('result-screen');
+ 
+ const startBtn = document.getElementById('start-btn');
+ const nextBtn = document.getElementById('next-btn');
+ const restartBtn = document.getElementById('restart-btn');
+ 
+ const questionElement = document.getElementById('question');
+ const optionsContainer = document.getElementById('options');
+ const scoreElement = document.getElementById('score');
+ 
+ let currentQuestionIndex = 0;
+ let score = 0;
+ 
+ // Start Quiz
+ startBtn.addEventListener('click', startQuiz);
+ function startQuiz() {
+     startScreen.classList.remove('active');
+     quizScreen.classList.add('active');
+     currentQuestionIndex = 0;
+     score = 0;
+     showQuestion();
+ }
+ 
+ // Show Question
+ function showQuestion() {
+     resetState();
+     const currentQuestion = questions[currentQuestionIndex];
+     questionElement.innerText = currentQuestion.question;
+ 
+     currentQuestion.options.forEach(option => {
+         const button = document.createElement('button');
+         button.innerText = option;
+         button.classList.add('option-btn');
+         button.addEventListener('click', () => selectAnswer(button, currentQuestion.answer));
+         optionsContainer.appendChild(button);
+     });
+ }
+ 
+ // Reset State
+ function resetState() {
+     optionsContainer.innerHTML = '';
+     nextBtn.style.display = 'none';
+ }
+ 
+ // Select Answer
+ function selectAnswer(button, correctAnswer) {
+     const isCorrect = button.innerText === correctAnswer;
+     if (isCorrect) {
+         button.classList.add('correct');
+         score++;
+     } else {
+         button.classList.add('incorrect');
+     }
+ 
+     Array.from(optionsContainer.children).forEach(btn => {
+         if (btn.innerText === correctAnswer) {
+             btn.classList.add('correct');
+         }
+         btn.disabled = true;
+     });
+ 
+     nextBtn.style.display = 'block';
+ }
+ 
+ // Next Question
+ nextBtn.addEventListener('click', () => {
+     currentQuestionIndex++;
+     if (currentQuestionIndex < questions.length) {
+         showQuestion();
+     } else {
+         showResult();
+     }
+ });
+ 
+ // Show Result
+ function showResult() {
+     quizScreen.classList.remove('active');
+     resultScreen.classList.add('active');
+     scoreElement.innerText = `Your score: ${score}/${questions.length}`;
+ }
+ 
+ // Restart Quiz
+ restartBtn.addEventListener('click', () => {
+     resultScreen.classList.remove('active');
+     startScreen.classList.add('active');
+ });
+
+ </script>
+
+</body>
+</html>
